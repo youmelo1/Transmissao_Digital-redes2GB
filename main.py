@@ -7,4 +7,5 @@ if __name__ == '__main__':
     
     sistema_comunicacao = SistemaComunicacao(fonte, voltagem, snr_db)
     texto_final, taxa_ber = sistema_comunicacao.executar()
-    print(f"Texto Final: {texto_final}\nTaxa de Erro de Bit: {taxa_ber}")
+    print(f"Texto Final: {texto_final}")
+    print(f"Taxa de Erro de Bit: {taxa_ber}")
