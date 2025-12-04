@@ -1,5 +1,9 @@
 # Simulação de Sistemas de Comunicação Digital (ASK vs BPSK)
 
+Autores: 
+- Guilherme Maia Nogueira
+- Rodrigo Fuelber Franke
+  
 Este projeto implementa uma simulação completa de uma cadeia de transmissão digital, atendendo aos requisitos da disciplina de Redes de Computadores II. O sistema compara duas técnicas de modulação sob a influência de ruído AWGN (*Additive White Gaussian Noise*):
 
 1.  **AMI + ASK:** Codificação de Linha *Alternate Mark Inversion* com Modulação por Chaveamento de Amplitude.
