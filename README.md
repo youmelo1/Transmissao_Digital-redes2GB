@@ -1,120 +1,86 @@
 # Simulação de Sistemas de Comunicação Digital (ASK vs BPSK)
 
-Este projeto implementa uma simulação completa de uma cadeia de transmissão digital, comparando duas técnicas de modulação clássicas sob a influência de ruído AWGN (Additive White Gaussian Noise):
+Este projeto implementa uma simulação completa de uma cadeia de transmissão digital, atendendo aos requisitos da disciplina de Redes de Computadores II. O sistema compara duas técnicas de modulação sob a influência de ruído AWGN (*Additive White Gaussian Noise*):
 
 1.  **AMI + ASK:** Codificação de Linha *Alternate Mark Inversion* com Modulação por Chaveamento de Amplitude.
 2.  **NRZ + BPSK:** Codificação de Linha *Non-Return-to-Zero* com Modulação por Chaveamento de Fase Binária.
 
-O objetivo é visualizar a **Taxa de Erro de Bit (BER)** em função da **Relação Sinal-Ruído (SNR)**.
+O objetivo principal é visualizar a **Taxa de Erro de Bit (BER)** em função da **Relação Sinal-Ruído (SNR)** e entender graficamente o comportamento do sinal.
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-O projeto é dividido em módulos para facilitar a manutenção e o entendimento:
+O projeto foi modularizado para garantir clareza e organização:
 
-### 1. `main.py` (Entrada)
-É o painel de controle. Aqui você define os parâmetros da simulação (mensagem, voltagem, intervalo de SNR) e executa os testes. **É o único arquivo que você precisa editar para rodar testes diferentes.**
+### 1. `main.py` (Demos Fixas)
+Este arquivo contém uma suíte de demonstrações pré-configuradas. Ao ser executado, ele roda sequencialmente três cenários fixos para apresentar o funcionamento do trabalho (envio de texto, geração de gráficos e visualização de ondas).
 
-### 2. `benchmark.py` (Análise)
-Contém a classe `Benchmark`, que automatiza os testes.
-* `validar_sistema`: Roda uma transmissão única para verificar se a mensagem chega legível.
-* `gerar_grafico_comparativo`: Roda um loop de simulações variando o ruído, calcula o BER para ASK e BPSK e gera um gráfico comparativo salvo na pasta `images/`.
+### 2. `benchmark.py` (Ferramenta de Testes Personalizados)
+Contém a classe `Benchmark`. Esta é a ferramenta que você deve utilizar caso queira realizar seus próprios testes com parâmetros personalizados.
+* **`validar_sistema(...)`**: Para testar o envio de uma mensagem específica.
+* **`gerar_grafico_comparativo(...)`**: Para gerar curvas de BER com intervalos de SNR definidos por você.
 
 ### 3. `sistema.py` (Orquestrador)
-Contém a classe `SistemaComunicacao`. Ela conecta as pontas: pega a mensagem, chama a codificação, modulação, adiciona ruído, demodula e decodifica. É a "placa mãe" da simulação.
+Contém a classe `SistemaComunicacao`, que conecta as pontas: fonte -> codificação -> modulação -> canal ruidoso -> demodulação -> decodificação.
 
-### 4. `componentes.py` (Biblioteca)
-Contém as funções matemáticas e lógicas de baixo nível:
-* Conversão ASCII ↔ Binário.
-* Codificadores de linha (AMI, NRZ).
-* Moduladores e Demoduladores (ASK, BPSK).
-* Canal com ruído AWGN.
-* Cálculo de BER.
+### 4. `componentes.py` (Biblioteca Física e de Enlace)
+Contém as funções matemáticas de baixo nível: conversão binária, codificadores AMI/NRZ, moduladores ASK/BPSK, canal AWGN e cálculo de BER.
 
 ---
 
-## 🚀 Como Executar
+## 🚀 Como Executar (Modo Demonstração)
 
-### Pré-requisitos
-Você precisará do Python instalado e das bibliotecas `numpy` e `matplotlib`.
-
-```bash
-pip install numpy matplotlib
-````
-
-### Rodando a Simulação
-
-Basta executar o arquivo principal:
+Para ver o trabalho em funcionamento com as configurações padrão, basta executar o arquivo principal.
 
 ```bash
 python main.py
-```
+````
 
-Ao executar, o script fará duas coisas automaticamente:
+Isso iniciará automaticamente as **Demos Fixas**:
 
-1.  Imprimirá no terminal o resultado de um envio de mensagem simples.
-2.  Gerará uma simulação pesada variando o ruído e abrirá uma janela com o gráfico comparativo (além de salvar a imagem em `images/`).
+1.  **Teste de Texto:** Envia a string *"Engenharia de Telecomunicacoes"* via BPSK a 15dB.
+2.  **Curva de Desempenho:** Gera o gráfico BER vs SNR comparando ASK e BPSK (0 a 18 dB).
+3.  **Osciloscópio:** Plota as formas de onda elétrica de uma sequência curta de bits.
 
 -----
 
-## 🧪 Como Personalizar os Testes
+## 🛠 Como Criar Seus Próprios Testes (Modo Benchmark)
 
-Para alterar os cenários de teste, você deve modificar as variáveis dentro do bloco `if __name__ == '__main__':` no arquivo **`main.py`**.
+Se você deseja simular cenários específicos (ex: testar se uma mensagem chega com 5V de voltagem ou analisar um intervalo de ruído diferente), você deve utilizar a classe `Benchmark` dentro do seu código (no `main.py` ou em um novo script).
 
-### Cenário 1: Testar uma mensagem curta e ver se chega correta
+### 1\. Testar uma Mensagem Específica (Single Run)
 
-Se você quer apenas ver se o sistema está funcionando e decodificando o texto corretamente, altere a **Parte 1** da `main.py`.
-
-**Exemplo:** Quero testar uma mensagem urgente com modulação ASK e Voltagem alta (5V).
+Use o método `Benchmark.validar_sistema` para verificar se sua mensagem sobrevive a um nível específico de ruído.
 
 ```python
-# Na main.py, altere as variáveis:
-msg_teste = 'SOCORRO URGENTE'
-voltagem = 5.0
-snr_fixo = 30.0  # SNR alta para garantir que chegue limpo
-modulacao = 'ASK' 
+from benchmark import Benchmark
 
-# O código executará a validação:
-Benchmark.validar_sistema(msg_teste, voltagem, snr_fixo, modulacao)
-```
-
-### Cenário 2: Alterar o Gráfico (Intervalo de Teste)
-
-Se você quiser ver como o sistema se comporta em situações de ruído extremo ou muito sutil, altere o `meu_intervalo_snr` na **Parte 2**.
-
-**Exemplo:** Quero um gráfico mais detalhado, indo de 0dB até 10dB, testando de 1 em 1 dB.
-
-```python
-# np.arange(inicio, fim, passo)
-meu_intervalo_snr = np.arange(0, 11, 1) 
-
-# Nome do arquivo que será salvo
-nome_grafico = "Teste_Detalhado_Baixo_SNR"
-
-Benchmark.gerar_grafico_comparativo(
-    mensagem=msg_longa,
-    voltagem=voltagem,
-    intervalo_snr=meu_intervalo_snr,
-    titulo=nome_grafico
+# Exemplo: Testando envio crítico com pouca energia (0.5V) e muito ruído (5dB)
+Benchmark.validar_sistema(
+    mensagem="Teste Personalizado 123", 
+    voltagem=0.5, 
+    snr_db=5.0, 
+    modulacao='BPSK'
 )
 ```
 
-### Cenário 3: Testar o impacto da Voltagem
+### 2\. Gerar Gráficos Personalizados
 
-Você pode verificar como aumentar a voltagem melhora a resistência ao ruído.
-
-**Exemplo:** Teste com voltagem baixa (0.5V). O erro deve aumentar consideravelmente.
+Use o método `Benchmark.gerar_grafico_comparativo` para estressar o sistema em um intervalo de SNR definido por você.
 
 ```python
-# Altere a voltagem passada para a função
-voltagem_baixa = 0.5
+import numpy as np
+from benchmark import Benchmark
+
+# Exemplo: Gerando gráfico de alta precisão (de 0 a 10dB, passo de 0.5)
+meu_intervalo = np.arange(0, 10.5, 0.5)
 
 Benchmark.gerar_grafico_comparativo(
-    mensagem=msg_longa,
-    voltagem=voltagem_baixa, # Passando a nova voltagem
-    intervalo_snr=meu_intervalo_snr,
-    titulo="Teste_Voltagem_Baixa"
+    mensagem="Texto longo para estatistica...",
+    voltagem=1.0,
+    intervalo_snr=meu_intervalo,
+    titulo="Meu_Teste_Personalizado"
 )
 ```
 
@@ -122,8 +88,24 @@ Benchmark.gerar_grafico_comparativo(
 
 ## 📊 Entendendo os Resultados
 
-1.  **Terminal:** Você verá a mensagem original e a recebida. Se houver caracteres estranhos na mensagem recebida, significa que o ruído corrompeu alguns bits.
-2.  **Gráfico (BER x SNR):**
-      * **Eixo Y (BER):** É a taxa de erro. Quanto mais baixo, melhor. (Escala Logarítmica).
-      * **Eixo X (SNR):** É a qualidade do sinal. Quanto mais alto (para a direita), menos ruído existe.
-      * **Conclusão Esperada:** O BPSK (linha azul) geralmente apresenta desempenho melhor (menor erro) que o ASK (linha vermelha) para a mesma quantidade de energia/ruído, devido à maior distância euclidiana entre os símbolos na constelação.
+### 1\. Terminal (Log)
+
+Nos testes de validação, você verá:
+
+  * **Mensagem Original vs Recebida:** Permite ver visualmente se o texto foi corrompido.
+  * **BER (Taxa de Erro):** 0.0 significa perfeição. Valores acima de 0 indicam erros.
+
+### 2\. Gráfico BER x SNR (Curva Waterfall)
+
+Este gráfico é gerado pelo Benchmark.
+
+  * **Eixo Y (BER):** Taxa de erro (escala logarítmica).
+  * **Eixo X (SNR):** Qualidade do sinal em dB.
+  * **Interpretação:** O sistema **BPSK** (linha azul) tende a cair mais rápido (menos erros) do que o **ASK** (linha vermelha) conforme a qualidade do sinal melhora.
+
+### 3\. Visualização de Ondas
+
+Mostra a física do sinal:
+
+  * **ASK:** Varia a amplitude (+V, 0, -V).
+  * **BPSK:** Varia a fase (inverte a polaridade +V, -V).
